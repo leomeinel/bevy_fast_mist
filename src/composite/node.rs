@@ -62,7 +62,7 @@ impl ViewNode for MistCompositeNode {
 
         let mut render_pass = render_context.begin_tracked_render_pass(RenderPassDescriptor {
             label: Some("mist_composite_render_pass"),
-            // TODO: Unsampled is probably incorrect, if so implement SpecializedRenderpipeline to modify msaa.
+            // NOTE: I'm not entirely sure if using unsampled here is correct.
             color_attachments: &[Some(view_target.get_unsampled_color_attachment())],
             depth_stencil_attachment: None,
             timestamp_writes: None,
