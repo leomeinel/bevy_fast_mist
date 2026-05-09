@@ -34,7 +34,9 @@ pub struct FastMistPlugin {
 }
 impl Default for FastMistPlugin {
     fn default() -> Self {
-        Self { texture_scale: 1. }
+        Self {
+            texture_scale: 1. / 16.,
+        }
     }
 }
 impl Plugin for FastMistPlugin {
