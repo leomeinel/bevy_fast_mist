@@ -2,5 +2,8 @@
 
 struct MeshMist {
     color: vec3<f32>,
-    elapsed_secs: f32,
+    frequency: f32,
+    offset: vec2<f32>,
+    alpha_bias: f32,
+    max_alpha: f32,
 }

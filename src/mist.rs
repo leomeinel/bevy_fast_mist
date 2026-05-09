@@ -33,6 +33,7 @@ use bevy::{
         resource::Resource,
         system::{SystemParamItem, lifetimeless::SRes},
     },
+    math::Vec2,
     platform::collections::HashMap,
     reflect::Reflect,
     render::{
@@ -64,12 +65,34 @@ pub struct MeshMist {
     pub color: Color,
     /// The intensity of the mist.
     pub intensity: f32,
+    /// The frequency of the mist.
+    ///
+    /// This determines the size of the mist-filled regions.
+    pub frequency: f32,
+    /// The direction of the mist.
+    ///
+    /// This determines the movement direction of the mist.
+    pub direction: Vec2,
+    /// The alpha bias of the mist.
+    ///
+    /// This determines the minimum rendered value of the mist noise by being added directly to it.
+    ///
+    /// ## Note
+    ///
+    /// This is meant to be in the range of `0.0..-1.0`.
+    pub alpha_bias: f32,
+    /// This determines the absolute max alpha of the mist.
+    pub max_alpha: f32,
 }
 impl Default for MeshMist {
     fn default() -> Self {
         Self {
             color: Color::WHITE,
             intensity: 1.,
+            frequency: 0.01,
+            direction: Vec2::new(0.16, 0.04),
+            alpha_bias: -0.3,
+            max_alpha: 0.6,
         }
     }
 }

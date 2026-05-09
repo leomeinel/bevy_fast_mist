@@ -14,7 +14,7 @@ use bevy::{
         query::With,
         system::{Commands, Local, Query, Res, ResMut},
     },
-    math::Vec3,
+    math::{Vec2, Vec3},
     mesh::Mesh2d,
     platform::collections::HashSet,
     render::{
@@ -23,7 +23,6 @@ use bevy::{
         sync_world::RenderEntity, view::RetainedViewEntity,
     },
     time::Time,
-    utils::default,
 };
 use bytemuck::{Pod, Zeroable};
 
@@ -34,12 +33,15 @@ use crate::{mist::prelude::*, utils::prelude::*};
 #[derive(Component, Default, Clone, Copy, ShaderType, Debug, Pod, Zeroable)]
 pub(crate) struct ExtractedMeshMist {
     pub(super) color: Vec3,
-    pub(super) elapsed_secs: f32,
+    pub(super) frequency: f32,
+    pub(super) offset: Vec2,
+    pub(super) alpha_bias: f32,
+    pub(super) max_alpha: f32,
 }
 impl ExtractedMeshMist {
-    fn with_elapsed_secs(self, elapsed_secs: f32) -> Self {
+    fn with_scaled_offset(self, scale_factor: f32) -> Self {
         Self {
-            elapsed_secs,
+            offset: self.offset * scale_factor,
             ..self
         }
     }
@@ -48,7 +50,10 @@ impl From<MeshMist> for ExtractedMeshMist {
     fn from(light: MeshMist) -> Self {
         Self {
             color: light.color.to_scaled_vec3(light.intensity),
-            ..default()
+            frequency: light.frequency,
+            offset: light.direction,
+            alpha_bias: light.alpha_bias,
+            max_alpha: light.max_alpha / (1. + light.alpha_bias),
         }
     }
 }
@@ -95,6 +100,6 @@ pub(super) fn extract_mesh_mists(
     for (render_entity, mist) in &mist_query {
         commands
             .entity(**render_entity)
-            .insert(ExtractedMeshMist::from(*mist).with_elapsed_secs(time.elapsed_secs_wrapped()));
+            .insert(ExtractedMeshMist::from(*mist).with_scaled_offset(time.elapsed_secs_wrapped()));
     }
 }
