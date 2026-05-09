@@ -1,0 +1,76 @@
+/*
+ * Heavily inspired by:
+ * - https://bevy.org/examples/shaders/custom-post-processing/
+ */
+
+//! Render pipelines for rendering mist to a scaled texture.
+
+use bevy::{
+    asset::{AssetServer, Handle, load_embedded_asset},
+    ecs::{
+        resource::Resource,
+        system::{Commands, Res},
+    },
+    mesh::MeshVertexBufferLayoutRef,
+    render::render_resource::{binding_types::uniform_buffer, *},
+    shader::Shader,
+    sprite_render::{Mesh2dPipeline, Mesh2dPipelineKey},
+};
+
+use crate::mist::prelude::*;
+
+/// Pipeline that computes mist in the shader.
+#[derive(Resource)]
+pub(super) struct MeshMistPipeline {
+    pub(super) mesh_pipeline: Mesh2dPipeline,
+    pub(super) fragment_layout: BindGroupLayoutDescriptor,
+    pub(super) shader: Handle<Shader>,
+}
+impl SpecializedMeshPipeline for MeshMistPipeline {
+    type Key = Mesh2dPipelineKey;
+
+    fn specialize(
+        &self,
+        key: Self::Key,
+        layout: &MeshVertexBufferLayoutRef,
+    ) -> Result<RenderPipelineDescriptor, SpecializedMeshPipelineError> {
+        let mut descriptor = self.mesh_pipeline.specialize(key, layout)?;
+
+        descriptor.label = Some("mesh_mist_pipeline".into());
+        descriptor.layout.push(self.fragment_layout.clone());
+
+        let fragment = descriptor.fragment.as_mut().unwrap();
+        fragment.shader = self.shader.clone();
+        fragment.targets = vec![Some(ColorTargetState {
+            format: TextureFormat::Rgba8Unorm,
+            blend: Some(BlendState::ALPHA_BLENDING),
+            write_mask: ColorWrites::ALL,
+        })];
+
+        descriptor.multisample = MultisampleState::default();
+        descriptor.depth_stencil = None;
+
+        Ok(descriptor)
+    }
+}
+
+/// Initialize [`MeshMistPipeline`].
+pub(super) fn init_mesh_mist_pipeline(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mesh_pipeline: Res<Mesh2dPipeline>,
+) {
+    let fragment_layout = BindGroupLayoutDescriptor::new(
+        "mesh_mist_fragment_bind_group_layout",
+        &BindGroupLayoutEntries::single(
+            ShaderStages::FRAGMENT,
+            uniform_buffer::<ExtractedMeshMist>(false),
+        ),
+    );
+
+    commands.insert_resource(MeshMistPipeline {
+        mesh_pipeline: mesh_pipeline.clone(),
+        fragment_layout,
+        shader: load_embedded_asset!(asset_server.as_ref(), "mesh_mist.wgsl"),
+    });
+}
