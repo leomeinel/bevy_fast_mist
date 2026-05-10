@@ -3,7 +3,6 @@
 mod mist;
 mod noise;
 mod plugin;
-mod utils;
 
 pub mod prelude {
     pub use crate::mist::MeshMist;

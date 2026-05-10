@@ -7,6 +7,7 @@
 
 use bevy::{
     camera::{Camera, Camera2d},
+    color::{Alpha as _, LinearRgba},
     ecs::{
         component::Component,
         entity::Entity,
@@ -14,7 +15,7 @@ use bevy::{
         query::With,
         system::{Commands, Local, Query, Res, ResMut},
     },
-    math::{FloatOrd, Vec2, Vec3},
+    math::{FloatOrd, Vec2},
     mesh::Mesh2d,
     platform::collections::HashSet,
     render::{
@@ -27,14 +28,13 @@ use bevy::{
 };
 use bytemuck::{Pod, Zeroable};
 
-use crate::{mist::prelude::*, utils::prelude::*};
+use crate::mist::prelude::*;
 
 /// [`ShaderType`] that gets extracted to the render world for [`MeshLight2d`].
 #[repr(C)]
 #[derive(Component, Default, Clone, Copy, ShaderType, Debug, Pod, Zeroable)]
 pub(crate) struct ExtractedMeshMist {
-    pub(super) color: Vec3,
-    _padding: f32,
+    pub(super) color: LinearRgba,
     pub(super) offset: Vec2,
     pub(super) alpha_bias: f32,
     pub(super) max_alpha: f32,
@@ -50,7 +50,7 @@ impl ExtractedMeshMist {
 impl From<MeshMist> for ExtractedMeshMist {
     fn from(mist: MeshMist) -> Self {
         Self {
-            color: mist.color.to_scaled_vec3(mist.intensity),
+            color: (mist.color.to_linear() * mist.intensity).with_alpha(1.),
             offset: mist.direction,
             alpha_bias: mist.alpha_bias,
             max_alpha: mist.max_alpha / (1. + mist.alpha_bias),

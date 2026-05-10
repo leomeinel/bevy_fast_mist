@@ -49,12 +49,11 @@ use bevy::{
 ///
 /// ## Formula
 ///
-/// color = vec4<f32>([`color`](Self::color) * [`intensity`](Self::intensity), `mist_alpha` * `edge_alpha`).
+/// color = [`color`](Self::color) * [`intensity`](Self::intensity) * `attenuation`.
 ///
 /// ## Note
 ///
-/// - `mist_alpha` and `edge_alpha` are sampled from a noise texture using [`frequency`](Self::frequency) and [`direction`](Self::direction).
-/// - `mist_alpha` is calculated via: `mist_noise` + [`alpha_bias`](Self::alpha_bias) * [`max_alpha`](Self::max_alpha)
+/// - `attenuation` is influenced by two separate noise textures using [`frequency`](Self::frequency) and [`direction`](Self::direction).
 #[derive(Component, Reflect, Clone, Copy)]
 #[require(SyncToRenderWorld)]
 pub struct MeshMist {

@@ -23,6 +23,7 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let mist_alpha = saturate(noise.r + mist.alpha_bias) * mist.max_alpha;
     let edge_dist = min(min(in.uv.x, 1.0 - in.uv.x), min(in.uv.y, 1.0 - in.uv.y)) * INV_EDGE_BAND;
     let edge_alpha = 1. - smoothstep(1., 0., edge_dist - noise.g * EDGE_NOISE_SCALE);
+    let attenuation = mist_alpha * edge_alpha;
 
-    return vec4<f32>(mist.color, mist_alpha * edge_alpha);
+    return mist.color * attenuation;
 }

@@ -52,7 +52,9 @@ impl SpecializedMeshPipeline for MeshMistPipeline {
         fragment.shader = self.shader.clone();
         fragment.targets = vec![Some(ColorTargetState {
             format: TextureFormat::bevy_default(),
-            blend: Some(BlendState::ALPHA_BLENDING),
+            // NOTE: This is needed since we need to alpha blend the rendered sprite z-levels.
+            //       Since we are multiplying everything in `mesh_mist` by `attenuation`, we need `BlendState::PREMULTIPLIED_ALPHA_BLENDING`.
+            blend: Some(BlendState::PREMULTIPLIED_ALPHA_BLENDING),
             write_mask: ColorWrites::ALL,
         })];
 
