@@ -13,13 +13,27 @@ Simple moving 2D mist for Bevy focused on performance over features.
 
 ### Mist
 
-| Purpose | Component | Config |
-| ------- | --------- | ------ |
-|         |           |        |
+| Purpose   | Component  | Config                                                                       |
+| --------- | ---------- | ---------------------------------------------------------------------------- |
+| Mesh mist | `MeshMist` | `color`, `intensity`, `frequency`, `direction`, `alpha_bias` and `max_alpha` |
+
+### Mesh2d
+
+The following `Components` allow the customization of their shape via attaching a `Mesh2d`:
+
+- `MeshMist`
+
+The `Mesh2d` is required for the `Components` to render.
 
 ## Usage
 
 Take a look at [`/examples`](https://github.com/leomeinel/bevy_fast_mist/tree/main/examples) to find out how to use this crate.
+
+### Showcase
+
+I am using most features in my learning project [Slimy Mist](https://github.com/leomeinel/slimy_mist).
+
+<img src="https://github.com/leomeinel/bevy_fast_mist/blob/main/static/slimy_mist.webp?raw=true" width="400" alt="slimy mist example">
 
 ### Examples
 
@@ -34,7 +48,7 @@ Scene with a green `Rectangle` as background and a light cyan `MeshMist`.
 ### Code
 
 - [Bevy Example - Custom Render Phase](https://bevy.org/examples/shaders/custom-render-phase/)
-- [Noisy Bevy](https://crates.io/crates/noisy_bevy)
+- [Noise Functions](https://crates.io/crates/noise-functions)
 
 ### Articles
 

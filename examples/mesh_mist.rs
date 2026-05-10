@@ -27,7 +27,7 @@ fn setup(
 
     commands.spawn((
         MeshMist {
-            color: tailwind::CYAN_300.into(),
+            color: tailwind::CYAN_100.into(),
             intensity: 1.,
             ..default()
         },
