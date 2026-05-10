@@ -2,10 +2,9 @@
 
 #import bevy_fast_mist::mist::types::MeshMist
 
-const TEXTURE_SIZE = 512.;
+const INV_TEXTURE_SIZE = 1. / 512.;
 
-const EDGE_BAND = 0.25;
-const INV_EDGE_BAND = 1. / EDGE_BAND;
+const INV_EDGE_BAND = 1. / 0.25;
 const EDGE_NOISE_SCALE = 0.5;
 
 @group(2) @binding(0)
@@ -18,7 +17,7 @@ var<uniform> mist: MeshMist;
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     let pos = in.world_position.xy + mist.offset;
-    let noise_uv = fract(pos / TEXTURE_SIZE);
+    let noise_uv = fract(pos * INV_TEXTURE_SIZE);
     let noise = textureSample(noise_texture, noise_sampler, noise_uv);
 
     let mist_alpha = saturate(noise.r + mist.alpha_bias) * mist.max_alpha;
