@@ -5,7 +5,7 @@
 [![Downloads](https://img.shields.io/crates/d/bevy_fast_mist.svg)](https://crates.io/crates/bevy_fast_mist)
 [![Docs](https://docs.rs/bevy_fast_mist/badge.svg)](https://docs.rs/bevy_fast_mist/latest/bevy_fast_mist/)
 
-Simple 2D mist for Bevy focused on performance over features.
+Simple moving 2D mist for Bevy focused on performance over features.
 
 :warning: | This is still in development and not at all feature complete.
 

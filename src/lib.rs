@@ -1,4 +1,4 @@
-//! Simple 2D mist for Bevy focused on performance over features.
+//! Simple moving 2D mist for Bevy focused on performance over features.
 
 mod composite;
 mod mist;
