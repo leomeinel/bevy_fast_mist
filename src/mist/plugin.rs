@@ -47,7 +47,6 @@ impl Plugin for MeshMistPlugin {
             .init_resource::<DrawFunctions<MeshMistPhase>>()
             .init_resource::<SpecializedMeshPipelines<MeshMistPipeline>>()
             .init_resource::<ViewBinnedRenderPhases<MeshMistPhase>>()
-            .init_resource::<MeshMistTextures>()
             .init_resource::<MeshMistFragmentBindGroups>()
             .init_resource::<MeshMistUniformBuffers>();
 
@@ -71,13 +70,10 @@ impl Plugin for MeshMistPlugin {
             (
                 super::phase::queue_mesh_mists.in_set(RenderSystems::Queue),
                 (
-                    super::prepare::prepare_mesh_mist_texture,
-                    (
-                        super::prepare::prepare_mesh_mist_buffers,
-                        super::prepare::prepare_mesh_mist_fragment_bind_groups,
-                    )
-                        .chain(),
+                    super::prepare::prepare_mesh_mist_buffers,
+                    super::prepare::prepare_mesh_mist_fragment_bind_groups,
                 )
+                    .chain()
                     .in_set(RenderSystems::PrepareResources),
             ),
         );

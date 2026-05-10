@@ -19,44 +19,17 @@ use bevy::{
             BindGroupEntries, Buffer, BufferInitDescriptor, BufferUsages, PipelineCache,
         },
         renderer::{RenderDevice, RenderQueue},
-        texture::{CachedTexture, GpuImage, TextureCache},
-        view::{ExtractedView, RetainedViewEntity, ViewTarget},
+        texture::GpuImage,
+        view::ExtractedView,
     },
 };
 use bytemuck::cast_slice;
 
-use crate::{mist::prelude::*, noise::prelude::*, plugin::prelude::*, utils::prelude::*};
-
-/// [`CachedTexture`]s for [`MeshMist`].
-#[derive(Resource, Default)]
-pub(crate) struct MeshMistTextures(pub(crate) HashMap<RetainedViewEntity, CachedTexture>);
+use crate::{mist::prelude::*, noise::prelude::*};
 
 /// [`Buffer`]s mapped to [`MeshMist`] [`Entity`]s.
 #[derive(Resource, Default)]
 pub(super) struct MeshMistUniformBuffers(pub(super) HashMap<Entity, Buffer>);
-
-/// Prepare scaled [`CachedTexture`]s and insert into [`MeshMistTextures`].
-pub(super) fn prepare_mesh_mist_texture(
-    views: Query<(&ViewTarget, &ExtractedView)>,
-    mut textures: ResMut<MeshMistTextures>,
-    mut texture_cache: ResMut<TextureCache>,
-    render_device: Res<RenderDevice>,
-    settings: Res<FastMistSettings>,
-) {
-    for (view_target, extracted_view) in views {
-        let texture = cached_scaled_2d_texture(
-            &mut texture_cache,
-            &render_device,
-            &settings,
-            view_target,
-            "mesh_mist_texture",
-        );
-
-        textures
-            .0
-            .insert(extracted_view.retained_view_entity, texture);
-    }
-}
 
 /// Prepare [`MeshMistUniformBuffers`].
 pub(super) fn prepare_mesh_mist_buffers(

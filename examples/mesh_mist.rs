@@ -5,7 +5,7 @@ use bevy_fast_mist::prelude::*;
 
 fn main() -> AppExit {
     App::new()
-        .add_plugins((DefaultPlugins, FastMistPlugin::default()))
+        .add_plugins((DefaultPlugins, FastMistPlugin))
         .add_systems(Startup, setup)
         .run()
 }

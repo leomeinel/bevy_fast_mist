@@ -11,6 +11,7 @@ use bevy::{
         resource::Resource,
         system::{Commands, Res},
     },
+    image::BevyDefault,
     mesh::MeshVertexBufferLayoutRef,
     render::{
         render_resource::{
@@ -50,7 +51,7 @@ impl SpecializedMeshPipeline for MeshMistPipeline {
         let fragment = descriptor.fragment.as_mut().unwrap();
         fragment.shader = self.shader.clone();
         fragment.targets = vec![Some(ColorTargetState {
-            format: TextureFormat::Rgba8Unorm,
+            format: TextureFormat::bevy_default(),
             blend: Some(BlendState::ALPHA_BLENDING),
             write_mask: ColorWrites::ALL,
         })];

@@ -19,7 +19,6 @@ pub(super) mod prelude {
     pub(crate) use super::phase::MeshMistPhase;
     pub(super) use super::pipeline::MeshMistPipeline;
     pub(crate) use super::plugin::{MeshMistLabel, MeshMistPlugin};
-    pub(crate) use super::prepare::MeshMistTextures;
     pub(super) use super::prepare::MeshMistUniformBuffers;
     pub(super) use super::{MeshMistFragmentBindGroups, SetMeshMistFragmentBindGroup};
 }
