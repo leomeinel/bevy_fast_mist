@@ -1,6 +1,4 @@
-pub(super) mod prelude {
-    pub(crate) use super::MistNoiseMap;
-}
+//! Noise for mist rendering.
 
 use bevy::{
     asset::{Assets, Handle, RenderAssetUsages},
@@ -8,7 +6,7 @@ use bevy::{
         resource::Resource,
         system::{Query, ResMut},
     },
-    image::Image,
+    image::{Image, ImageSampler},
     math::{FloatOrd, Vec2},
     platform::collections::{HashMap, HashSet},
     render::{
@@ -21,11 +19,15 @@ use noise_functions::{Noise, Simplex};
 
 use crate::mist::prelude::*;
 
+/// Map of [`MeshMist::frequency`] to the relevant noise [`Handle<Image>`].
 #[derive(Resource, Clone, Default, ExtractResource)]
 pub(crate) struct MistNoiseMap(pub(crate) HashMap<FloatOrd, Handle<Image>>);
 
 // FIXME: I'd prefer being able to only execute this when MeshMist is Added or Changed, but to
 //        clear old frequencies, we need to execute this every frame.
+/// Update [`MistNoiseMap`].
+///
+/// This generates [`Image`]s from [`noise_image`] and maps them to the used [`MeshMist::frequency`].
 pub(super) fn update_mist_noise_map(
     mist_query: Query<&MeshMist>,
     mut images: ResMut<Assets<Image>>,
@@ -42,9 +44,12 @@ pub(super) fn update_mist_noise_map(
     }
 }
 
+/// Size of the tileable noise [`Image`].
 const IMAGE_SIZE: u32 = 512;
+/// Frequency scale that is multiplied by [`MeshMist::frequency`] to get the edge frequency.
 const EDGE_FREQUENCY_SCALE: f32 = 0.6;
 
+//// Tileable noise [`Image`] using [`Simplex`] noise.
 fn noise_image(frequency: f32) -> Image {
     let size = IMAGE_SIZE as f32;
     let mist_noise = Simplex.tileable(frequency, frequency);
@@ -65,7 +70,7 @@ fn noise_image(frequency: f32) -> Image {
         }
     }
 
-    Image::new_fill(
+    let mut image = Image::new_fill(
         Extent3d {
             width: IMAGE_SIZE,
             height: IMAGE_SIZE,
@@ -75,5 +80,8 @@ fn noise_image(frequency: f32) -> Image {
         &data,
         TextureFormat::Rgba8Unorm,
         RenderAssetUsages::RENDER_WORLD,
-    )
+    );
+    image.sampler = ImageSampler::linear();
+
+    image
 }

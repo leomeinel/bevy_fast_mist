@@ -1,16 +1,8 @@
 //! [`FastMistPlugin`] and related.
-//!
-//! ## Render stages
-//!
-//! 1. Render a mist to the screen texture.
 
-use bevy::{
-    app::{App, Plugin, Update},
-    core_pipeline::core_2d::graph::{Core2d, Node2d},
-    render::{RenderApp, render_graph::RenderGraphExt as _},
-};
+use bevy::app::{App, Plugin};
 
-use crate::{mist::prelude::*, noise::prelude::*};
+use crate::mist::prelude::*;
 
 /// [`Plugin`] for fast 2D mist.
 ///
@@ -18,23 +10,6 @@ use crate::{mist::prelude::*, noise::prelude::*};
 pub struct FastMistPlugin;
 impl Plugin for FastMistPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<MistNoiseMap>();
-
         app.add_plugins(MeshMistPlugin);
-
-        app.add_systems(Update, super::noise::update_mist_noise_map);
-
-        let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
-            return;
-        };
-
-        render_app.add_render_graph_edges(
-            Core2d,
-            (
-                Node2d::MainTransparentPass,
-                MeshMistLabel,
-                Node2d::EndMainPass,
-            ),
-        );
     }
 }

@@ -1,46 +1,21 @@
 //! Different mist types and modules for rendering.
 //!
-//! This renders mist to the screen texture.
-//!
-//! This is the first and only render stage of [`FastMistPlugin`](crate::prelude::FastMistPlugin).
+//! This renders mist via [`MeshMistMaterial`](crate::mist::prelude::MeshMistMaterial).
 
-mod extract;
-mod node;
-mod phase;
-mod pipeline;
+mod material;
+mod noise;
 mod plugin;
-mod prepare;
 
 pub(super) mod prelude {
     pub(crate) use super::MeshMist;
-    pub(super) use super::extract::{ExtractedMeshMist, ExtractedMeshMistFrequency};
-    pub(super) use super::node::MeshMistNode;
-    pub(super) use super::phase::DrawMeshMist;
-    pub(crate) use super::phase::MeshMistPhase;
-    pub(super) use super::pipeline::MeshMistPipeline;
-    pub(crate) use super::plugin::{MeshMistLabel, MeshMistPlugin};
-    pub(super) use super::prepare::MeshMistUniformBuffers;
-    pub(super) use super::{MeshMistFragmentBindGroups, SetMeshMistFragmentBindGroup};
+    pub(super) use super::material::MeshMistMaterial;
+    pub(super) use super::noise::MistNoiseMap;
+    pub(crate) use super::plugin::MeshMistPlugin;
 }
 
 use bevy::{
-    color::Color,
-    ecs::{
-        component::Component,
-        entity::Entity,
-        query::ROQueryItem,
-        resource::Resource,
-        system::{SystemParamItem, lifetimeless::SRes},
-    },
-    math::Vec2,
-    platform::collections::HashMap,
-    reflect::Reflect,
-    render::{
-        render_phase::{PhaseItem, RenderCommand, RenderCommandResult, TrackedRenderPass},
-        render_resource::BindGroup,
-        sync_world::SyncToRenderWorld,
-        view::{ExtractedView, RetainedViewEntity},
-    },
+    color::Color, ecs::component::Component, math::Vec2, reflect::Reflect,
+    render::sync_world::SyncToRenderWorld,
 };
 
 /// Mesh mist for area mist in a 2D environment.
@@ -49,11 +24,11 @@ use bevy::{
 ///
 /// ## Formula
 ///
-/// color = [`color`](Self::color) * [`intensity`](Self::intensity) * `attenuation`.
+/// color = [`color`](Self::color) * [`intensity`](Self::intensity) * `alpha`.
 ///
 /// ## Note
 ///
-/// - `attenuation` is influenced by two separate noise textures using [`frequency`](Self::frequency) and [`direction`](Self::direction).
+/// - `alpha` is influenced by two separate noise textures using [`frequency`](Self::frequency) and [`direction`](Self::direction).
 #[derive(Component, Reflect, Clone, Copy)]
 #[require(SyncToRenderWorld)]
 pub struct MeshMist {
@@ -90,38 +65,5 @@ impl Default for MeshMist {
             alpha_bias: -0.3,
             max_alpha: 0.6,
         }
-    }
-}
-
-/// [`BindGroup`]s mapped to [`MeshMist`] [`Entity`]s.
-#[derive(Resource, Default)]
-pub(super) struct MeshMistFragmentBindGroups(
-    pub(super) HashMap<(RetainedViewEntity, Entity), BindGroup>,
-);
-
-/// Set [`BindGroup`]s from [`MeshMistFragmentBindGroups`] for [`DrawMeshMist`](crate::mist::prelude::DrawMeshMist).
-pub(super) struct SetMeshMistFragmentBindGroup<const I: usize>;
-impl<P: PhaseItem, const I: usize> RenderCommand<P> for SetMeshMistFragmentBindGroup<I> {
-    type Param = SRes<MeshMistFragmentBindGroups>;
-    type ViewQuery = &'static ExtractedView;
-    type ItemQuery = ();
-
-    fn render<'w>(
-        item: &P,
-        view: ROQueryItem<'w, '_, Self::ViewQuery>,
-        _entity: Option<()>,
-        bind_groups: SystemParamItem<'w, '_, Self::Param>,
-        pass: &mut TrackedRenderPass<'w>,
-    ) -> RenderCommandResult {
-        let bind_groups = bind_groups.into_inner();
-        let Some(bind_group) = bind_groups
-            .0
-            .get(&(view.retained_view_entity, item.entity()))
-        else {
-            return RenderCommandResult::Skip;
-        };
-
-        pass.set_bind_group(I, &bind_group, &[]);
-        RenderCommandResult::Success
     }
 }
