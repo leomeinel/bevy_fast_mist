@@ -3,7 +3,7 @@
  * - https://bevy.org/examples/shaders/custom-post-processing/
  */
 
-//! Render pipelines for rendering mist to a scaled texture.
+//! Render pipelines for rendering mist to the screen texture.
 
 use bevy::{
     asset::{AssetServer, Handle, load_embedded_asset},

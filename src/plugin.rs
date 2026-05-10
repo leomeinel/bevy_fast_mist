@@ -2,8 +2,7 @@
 //!
 //! ## Render stages
 //!
-//! 1. Render a mist map to a scalable texture.
-//! 2. Compose from mist map to screen texture.
+//! 1. Render a mist to the screen texture.
 
 use bevy::{
     app::{App, Plugin, Update},

@@ -3,7 +3,7 @@
  * - https://bevy.org/examples/shaders/custom-post-processing/
  */
 
-//! [`Plugin`] for rendering mist to a scaled texture.
+//! [`Plugin`] for rendering mist to the screen texture.
 
 use bevy::{
     app::{App, Plugin},

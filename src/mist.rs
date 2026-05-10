@@ -1,8 +1,8 @@
 //! Different mist types and modules for rendering.
 //!
-//! This renders a mist map to a scalable texture.
+//! This renders mist to the screen texture.
 //!
-//! This is the first render stage of [`FastMistPlugin`](crate::prelude::FastMistPlugin).
+//! This is the first and only render stage of [`FastMistPlugin`](crate::prelude::FastMistPlugin).
 
 mod extract;
 mod node;

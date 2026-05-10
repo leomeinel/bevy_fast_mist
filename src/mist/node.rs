@@ -1,4 +1,4 @@
-//! [`ViewNode`]s for rendering mist to a texture from [`MeshMistTextures`].
+//! [`ViewNode`]s for rendering mist to the screen texture.
 
 use bevy::{
     ecs::{query::QueryItem, world::World},
@@ -14,7 +14,7 @@ use bevy::{
 
 use crate::mist::prelude::*;
 
-/// [`ViewNode`] that renders mist to a texture from [`MeshMistTextures`].
+/// [`ViewNode`] that renders mist to the screen texture.
 #[derive(Default)]
 pub(super) struct MeshMistNode;
 impl ViewNode for MeshMistNode {
