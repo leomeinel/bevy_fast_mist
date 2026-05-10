@@ -12,6 +12,7 @@ use bevy::{
     ecs::schedule::IntoScheduleConfigs as _,
     render::{
         ExtractSchedule, Render, RenderApp, RenderDebugFlags, RenderStartup, RenderSystems,
+        extract_resource::ExtractResourcePlugin,
         render_graph::{RenderGraphExt, RenderLabel, ViewNodeRunner},
         render_phase::{
             AddRenderCommand as _, BinnedRenderPhasePlugin, DrawFunctions, ViewBinnedRenderPhases,
@@ -22,7 +23,7 @@ use bevy::{
     sprite_render::{Mesh2dPipeline, init_mesh_2d_pipeline},
 };
 
-use crate::mist::prelude::*;
+use crate::{mist::prelude::*, noise::prelude::*};
 
 /// [`Plugin`] for rendering mist to the screen texture.
 pub(crate) struct MeshMistPlugin;
@@ -31,11 +32,12 @@ impl Plugin for MeshMistPlugin {
         load_shader_library!(app, "types.wgsl");
         embedded_asset!(app, "mesh_mist.wgsl");
 
-        app.add_plugins(
+        app.add_plugins((
             BinnedRenderPhasePlugin::<MeshMistPhase, Mesh2dPipeline>::new(
                 RenderDebugFlags::default(),
             ),
-        );
+            ExtractResourcePlugin::<MistNoiseMap>::default(),
+        ));
 
         let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
             return;

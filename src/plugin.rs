@@ -10,7 +10,7 @@ pub(crate) mod prelude {
 }
 
 use bevy::{
-    app::{App, Plugin},
+    app::{App, Plugin, Update},
     core_pipeline::core_2d::graph::{Core2d, Node2d},
     ecs::resource::Resource,
     render::{
@@ -18,10 +18,9 @@ use bevy::{
         extract_resource::{ExtractResource, ExtractResourcePlugin},
         render_graph::RenderGraphExt as _,
     },
-    shader::load_shader_library,
 };
 
-use crate::{composite::prelude::*, mist::prelude::*};
+use crate::{composite::prelude::*, mist::prelude::*, noise::prelude::*};
 
 /// [`Plugin`] for fast 2D mist.
 ///
@@ -35,18 +34,19 @@ pub struct FastMistPlugin {
 impl Default for FastMistPlugin {
     fn default() -> Self {
         Self {
-            texture_scale: 1. / 16.,
+            texture_scale: 1. / 8.,
         }
     }
 }
 impl Plugin for FastMistPlugin {
     fn build(&self, app: &mut App) {
-        load_shader_library!(app, "simplex_noise_2d.wgsl");
-
         app.insert_resource(FastMistSettings::from(self));
+        app.init_resource::<MistNoiseMap>();
 
         app.add_plugins(ExtractResourcePlugin::<FastMistSettings>::default());
         app.add_plugins((MeshMistPlugin, MistCompositePlugin));
+
+        app.add_systems(Update, super::noise::update_mist_noise_map);
 
         let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
             return;

@@ -19,8 +19,9 @@ bevy = { version = "0.18", default-features = false, features = [
  "bevy_log",
  "bevy_sprite_render",
 ] }
-fixedbitset = "0.5"
 bytemuck = "1.25"
+fixedbitset = "0.5"
+noise-functions = "0.8"
 
 [dev-dependencies]
 bevy = { version = "0.18", default-features = false, features = [

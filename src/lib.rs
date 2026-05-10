@@ -2,6 +2,7 @@
 
 mod composite;
 mod mist;
+mod noise;
 mod plugin;
 mod utils;
 

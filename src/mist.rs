@@ -13,7 +13,7 @@ mod prepare;
 
 pub(super) mod prelude {
     pub(crate) use super::MeshMist;
-    pub(super) use super::extract::ExtractedMeshMist;
+    pub(super) use super::extract::{ExtractedMeshMist, ExtractedMeshMistFrequency};
     pub(super) use super::node::MeshMistNode;
     pub(super) use super::phase::DrawMeshMist;
     pub(crate) use super::phase::MeshMistPhase;
@@ -44,20 +44,18 @@ use bevy::{
     },
 };
 
-// TODO: Add correct docs
 /// Mesh mist for area mist in a 2D environment.
 ///
 /// This is meant to be added to a [`Mesh2d`](bevy::mesh::Mesh2d) which will determine the mists shape.
 ///
-/// The lit shape is an ellipse in the center that is influenced by the width and height of the [`Mesh2d`](bevy::mesh::Mesh2d). Therefore in most [`Mesh2d`](bevy::mesh::Mesh2d)s, the corners will not be lit.
-///
 /// ## Formula
 ///
-/// color = src_color * (ambient_color + [`MeshMist::color`] * [`MeshMist::intensity`] * attenuation).
+/// color = vec4<f32>([`color`](Self::color) * [`intensity`](Self::intensity), `mist_alpha` * `edge_alpha`).
 ///
 /// ## Note
 ///
-/// attenuation decreases smoothly from the center outwards.
+/// - `mist_alpha` and `edge_alpha` are sampled from a noise texture using [`frequency`](Self::frequency) and [`direction`](Self::direction).
+/// - `mist_alpha` is calculated via: `mist_noise` + [`alpha_bias`](Self::alpha_bias) * [`max_alpha`](Self::max_alpha)
 #[derive(Component, Reflect, Clone, Copy)]
 #[require(SyncToRenderWorld)]
 pub struct MeshMist {
@@ -89,8 +87,8 @@ impl Default for MeshMist {
         Self {
             color: Color::WHITE,
             intensity: 1.,
-            frequency: 0.01,
-            direction: Vec2::new(0.16, 0.04),
+            frequency: 3.,
+            direction: Vec2::new(4., 1.),
             alpha_bias: -0.3,
             max_alpha: 0.6,
         }

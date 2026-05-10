@@ -12,9 +12,16 @@ use bevy::{
         system::{Commands, Res},
     },
     mesh::MeshVertexBufferLayoutRef,
-    render::render_resource::{binding_types::uniform_buffer, *},
+    render::{
+        render_resource::{
+            binding_types::{sampler, texture_2d, uniform_buffer},
+            *,
+        },
+        renderer::RenderDevice,
+    },
     shader::Shader,
     sprite_render::{Mesh2dPipeline, Mesh2dPipelineKey},
+    utils::default,
 };
 
 use crate::mist::prelude::*;
@@ -24,6 +31,7 @@ use crate::mist::prelude::*;
 pub(super) struct MeshMistPipeline {
     pub(super) mesh_pipeline: Mesh2dPipeline,
     pub(super) fragment_layout: BindGroupLayoutDescriptor,
+    pub(super) noise_sampler: Sampler,
     pub(super) shader: Handle<Shader>,
 }
 impl SpecializedMeshPipeline for MeshMistPipeline {
@@ -59,18 +67,31 @@ pub(super) fn init_mesh_mist_pipeline(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mesh_pipeline: Res<Mesh2dPipeline>,
+    render_device: Res<RenderDevice>,
 ) {
     let fragment_layout = BindGroupLayoutDescriptor::new(
         "mesh_mist_fragment_bind_group_layout",
-        &BindGroupLayoutEntries::single(
+        &BindGroupLayoutEntries::sequential(
             ShaderStages::FRAGMENT,
-            uniform_buffer::<ExtractedMeshMist>(false),
+            (
+                texture_2d(TextureSampleType::Float { filterable: true }),
+                sampler(SamplerBindingType::Filtering),
+                uniform_buffer::<ExtractedMeshMist>(false),
+            ),
         ),
     );
+
+    let noise_sampler = render_device.create_sampler(&SamplerDescriptor {
+        mag_filter: FilterMode::Linear,
+        min_filter: FilterMode::Linear,
+        mipmap_filter: FilterMode::Linear,
+        ..default()
+    });
 
     commands.insert_resource(MeshMistPipeline {
         mesh_pipeline: mesh_pipeline.clone(),
         fragment_layout,
+        noise_sampler,
         shader: load_embedded_asset!(asset_server.as_ref(), "mesh_mist.wgsl"),
     });
 }

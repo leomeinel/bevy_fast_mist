@@ -14,7 +14,7 @@ use bevy::{
         query::With,
         system::{Commands, Local, Query, Res, ResMut},
     },
-    math::{Vec2, Vec3},
+    math::{FloatOrd, Vec2, Vec3},
     mesh::Mesh2d,
     platform::collections::HashSet,
     render::{
@@ -23,6 +23,7 @@ use bevy::{
         sync_world::RenderEntity, view::RetainedViewEntity,
     },
     time::Time,
+    utils::default,
 };
 use bytemuck::{Pod, Zeroable};
 
@@ -33,7 +34,7 @@ use crate::{mist::prelude::*, utils::prelude::*};
 #[derive(Component, Default, Clone, Copy, ShaderType, Debug, Pod, Zeroable)]
 pub(crate) struct ExtractedMeshMist {
     pub(super) color: Vec3,
-    pub(super) frequency: f32,
+    _padding: f32,
     pub(super) offset: Vec2,
     pub(super) alpha_bias: f32,
     pub(super) max_alpha: f32,
@@ -47,14 +48,22 @@ impl ExtractedMeshMist {
     }
 }
 impl From<MeshMist> for ExtractedMeshMist {
-    fn from(light: MeshMist) -> Self {
+    fn from(mist: MeshMist) -> Self {
         Self {
-            color: light.color.to_scaled_vec3(light.intensity),
-            frequency: light.frequency,
-            offset: light.direction,
-            alpha_bias: light.alpha_bias,
-            max_alpha: light.max_alpha / (1. + light.alpha_bias),
+            color: mist.color.to_scaled_vec3(mist.intensity),
+            offset: mist.direction,
+            alpha_bias: mist.alpha_bias,
+            max_alpha: mist.max_alpha / (1. + mist.alpha_bias),
+            ..default()
         }
+    }
+}
+
+#[derive(Component)]
+pub(super) struct ExtractedMeshMistFrequency(pub(super) FloatOrd);
+impl From<MeshMist> for ExtractedMeshMistFrequency {
+    fn from(mist: MeshMist) -> Self {
+        Self(FloatOrd(mist.frequency))
     }
 }
 
@@ -93,13 +102,14 @@ pub(super) fn extract_mesh_mists(
         };
         commands
             .entity(**render_entity)
-            .remove::<ExtractedMeshMist>();
+            .remove::<(ExtractedMeshMist, ExtractedMeshMistFrequency)>();
     }
 
     // Insert new extracted components
     for (render_entity, mist) in &mist_query {
-        commands
-            .entity(**render_entity)
-            .insert(ExtractedMeshMist::from(*mist).with_scaled_offset(time.elapsed_secs_wrapped()));
+        commands.entity(**render_entity).insert((
+            ExtractedMeshMist::from(*mist).with_scaled_offset(time.elapsed_secs_wrapped()),
+            ExtractedMeshMistFrequency::from(*mist),
+        ));
     }
 }

@@ -14,17 +14,18 @@ use bevy::{
     },
     platform::collections::HashMap,
     render::{
+        render_asset::RenderAssets,
         render_resource::{
             BindGroupEntries, Buffer, BufferInitDescriptor, BufferUsages, PipelineCache,
         },
         renderer::{RenderDevice, RenderQueue},
-        texture::{CachedTexture, TextureCache},
+        texture::{CachedTexture, GpuImage, TextureCache},
         view::{ExtractedView, RetainedViewEntity, ViewTarget},
     },
 };
 use bytemuck::cast_slice;
 
-use crate::{mist::prelude::*, plugin::prelude::*, utils::prelude::*};
+use crate::{mist::prelude::*, noise::prelude::*, plugin::prelude::*, utils::prelude::*};
 
 /// [`CachedTexture`]s for [`MeshMist`].
 #[derive(Resource, Default)]
@@ -80,24 +81,35 @@ pub(super) fn prepare_mesh_mist_buffers(
 /// Prepare [`MeshMistFragmentBindGroups`].
 pub(super) fn prepare_mesh_mist_fragment_bind_groups(
     views: Query<&ExtractedView>,
-    mist_query: Query<Entity, With<ExtractedMeshMist>>,
+    mist_query: Query<(Entity, &ExtractedMeshMistFrequency), With<ExtractedMeshMist>>,
     mut bind_groups: ResMut<MeshMistFragmentBindGroups>,
     buffers: Res<MeshMistUniformBuffers>,
     render_device: Res<RenderDevice>,
     pipeline_cache: Res<PipelineCache>,
     pipeline: Res<MeshMistPipeline>,
+    gpu_images: Res<RenderAssets<GpuImage>>,
+    mist_noise_map: Res<MistNoiseMap>,
 ) {
     bind_groups.0.clear();
     for extracted_view in &views {
-        for entity in &mist_query {
-            let Some(buffer) = buffers.0.get(&entity) else {
+        for (entity, scale) in &mist_query {
+            let Some(noise_image) = mist_noise_map.0.get(&scale.0) else {
+                continue;
+            };
+            let (Some(buffer), Some(noise_image)) =
+                (buffers.0.get(&entity), gpu_images.get(noise_image.id()))
+            else {
                 continue;
             };
 
             let fragment_bind_group = render_device.create_bind_group(
                 "mesh_mist_fragment_bind_group",
                 &pipeline_cache.get_bind_group_layout(&pipeline.fragment_layout),
-                &BindGroupEntries::single(buffer.as_entire_binding()),
+                &BindGroupEntries::sequential((
+                    &noise_image.texture_view,
+                    &pipeline.noise_sampler,
+                    buffer.as_entire_binding(),
+                )),
             );
             bind_groups.0.insert(
                 (extracted_view.retained_view_entity, entity),
