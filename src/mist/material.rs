@@ -105,9 +105,8 @@ pub(super) fn update_mesh_mist_material_offset(
     }
 
     for (id, direction) in id_map.iter() {
-        let Some(material) = materials.get_mut(*id) else {
-            continue;
+        if let Some(mut material) = materials.get_mut(*id) {
+            material.offset = direction * time.elapsed_secs_wrapped();
         };
-        material.offset = direction * time.elapsed_secs_wrapped();
     }
 }

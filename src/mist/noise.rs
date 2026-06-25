@@ -34,7 +34,7 @@ pub(super) fn update_mist_noise_map(
     mut noise_map: ResMut<MistNoiseMap>,
 ) {
     let frequencies: HashSet<FloatOrd> = mist_query.iter().map(|m| FloatOrd(m.frequency)).collect();
-    noise_map.0.retain(|f, _| frequencies.contains(&*f));
+    noise_map.0.retain(|f, _| frequencies.contains(f));
 
     for frequency in frequencies {
         noise_map
@@ -49,7 +49,7 @@ const IMAGE_SIZE: u32 = 512;
 /// Frequency scale that is multiplied by [`MeshMist::frequency`] to get the edge frequency.
 const EDGE_FREQUENCY_SCALE: f32 = 0.6;
 
-//// Tileable noise [`Image`] using [`Simplex`] noise.
+/// Tileable noise [`Image`] using [`Simplex`] noise.
 fn noise_image(frequency: f32) -> Image {
     let size = IMAGE_SIZE as f32;
     let mist_noise = Simplex.tileable(frequency, frequency);
